@@ -1,0 +1,25 @@
+{
+  "name": "structure-webpack-plugin",
+  "version": "1.0.0",
+  "description": "The plugin is used to output a directory structure file",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vivayue/structure-webpack-plugin.git"
+  },
+  "keywords": [
+    "webpack",
+    "plugin",
+    "build",
+    "structure"
+  ],
+  "author": "vivayue",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/vivayue/structure-webpack-plugin/issues"
+  },
+  "homepage": "https://github.com/vivayue/structure-webpack-plugin#readme"
+}
