@@ -2,7 +2,6 @@
 The plugin is used to output a directory structure file
 
 ## Getting Started
-----
 To begin, you'll need to install structure-webpack-plugin:
 ```
 npm install structure-webpack-plugin --save-dev
