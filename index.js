@@ -1,33 +1,76 @@
+const fs = require('fs');
 const pluginName = 'StructureWebpackPlugin';
+const NOOL = () => { };
 
 class StructureWebpackPlugin {
   constructor(options = {}){
-    this.options = options;
+    /**
+      * OPTIONS FORMAT
+      * const options = {
+      *   filename: 'modules.json',
+      *   includeNodeModules: false,
+      *   callback: () => {},
+      * }
+      */
+     this.options = options;
+     this.modules = {};
+     this.handleBuildModule = this.handleBuildModule.bind(this);
+     this.handleFinishModules = this.handleFinishModules.bind(this);
+  }
+  handleBuildModule(module) {
+    const { loaders } = module;
+    const { includeNodeModules } = this.options;
+    module.dependencies.forEach(item=>{
+      const rawRequest = item.userRequest.replace(process.cwd(), '');
+      if (includeNodeModules || !rawRequest.includes('node_modules')) {
+        this.modules[rawRequest] = {
+          start: (new Date()).getTime(),
+          loaders,
+          name: rawRequest,
+        };
+      }
+    });
+  }
+  handleFinishModules(modules) {
+    const {
+      callback = NOOL,
+      filename = 'modules.json',
+    } = this.options;
+    try {
+      const data = JSON.stringify(this.modules);
+      const writeToFilePath = `${process.cwd()}/${filename}`;
+      /**
+        * OUTPUT FORMAT
+        * modules.json = {
+        *   'src/index.js': {
+        *     name: 'src/index.js',
+        *     start: 1,
+        *     end: 4,
+        *     time: 3,
+        *     loaders: [ ... ]
+        *   },
+        *   ...
+        * }
+        */
+      fs.writeFile(writeToFilePath, data, 'utf8', callback);
+    } catch (e) {
+      console.error(`[${pluginName} ERROR]: `, e);
+    }
   }
   apply(compiler) {
-    compiler.hooks.emit.tapAsync(
+    compiler.hooks.compilation.tap(
       pluginName,
-      (compilation, callback) => {
-        // 在生成文件中，创建一个头部字符串：
-        var filelist = 'In this build:\n\n';
-        // 遍历所有编译过的资源文件，
-        // 对于每个文件名称，都添加一行内容。
-        for (var filename in compilation.assets) {
-          filelist += '- ' + filename + '\n';
-        }
-        // 将这个列表作为一个新的文件资源，插入到 webpack 构建中：
-        compilation.assets['filelist.md'] = {
-          source: function() {
-            return filelist;
-          },
-          size: function() {
-            return filelist.length;
-          }
-        };
-        // console.log(`当前工作目录是: ${process.cwd()}`);
-        // 使用 webpack 提供的 plugin API 操作构建结果
-        // compilation.addModule(/* ... */);
-        callback();
+      compilation => {
+        // 在模块构建开始之前触发
+        compilation.hooks.buildModule.tap(
+          pluginName,
+          this.handleBuildModule
+        );
+        // 所有模块都完成构建
+        compilation.hooks.finishModules.tap(
+          pluginName,
+          this.handleFinishModules
+        );
       }
     );
   }
