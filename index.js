@@ -1,4 +1,3 @@
-const fs = require('fs');
 const pluginName = 'StructureWebpackPlugin';
 
 class StructureWebpackPlugin {
@@ -9,7 +8,6 @@ class StructureWebpackPlugin {
     compiler.hooks.emit.tapAsync(
       pluginName,
       (compilation, callback) => {
-        // console.log('compilation: ', compilation.assets);
         // 在生成文件中，创建一个头部字符串：
         var filelist = 'In this build:\n\n';
         // 遍历所有编译过的资源文件，
@@ -29,7 +27,6 @@ class StructureWebpackPlugin {
         // console.log(`当前工作目录是: ${process.cwd()}`);
         // 使用 webpack 提供的 plugin API 操作构建结果
         // compilation.addModule(/* ... */);
-
         callback();
       }
     );
